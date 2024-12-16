@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --three-js-background: #1a1a2e;
+  --dark-gradient: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+  --cosmic-background: #1a1a2e;
+}
+
+@layer base {
+  html {
+    @apply text-white antialiased;
+  }
+
+  .three-container {
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    perspective: 1000px;
+  }
+}
+
+@layer components {
+  .section-title {
+    @apply text-4xl font-bold text-center text-white mb-8 tracking-tight;
+  }
+
+  .section-content {
+    @apply text-white;
+  }
+
+  .weather-card {
+    @apply bg-white/10 backdrop-blur-md rounded-2xl shadow-weather-glow p-6 transition-all duration-300;
+  }
+
+  .three-object {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  
+}
+
+@layer utilities {
+  .smooth-transition {
+    @apply transition duration-300 ease-in-out;
+  }
+
+  .cosmic-blur {
+    backdrop-filter: blur(10px);
+    background: rgba(26, 38, 62, 0.5);
+  }
+}
+
+body {
+  font-family: 'Inter', 'SF Pro Display', system-ui, sans-serif;
+  scroll-behavior: smooth;
+  background: var(--dark-gradient);
+  color: white;
+  transition: all 0.5s ease-in-out;
+}
+
+/* Ensure all text elements are white */
+h1, h2, h3, h4, h5, h6, p, span, div, a, label {
+  color: white !important;
+}
