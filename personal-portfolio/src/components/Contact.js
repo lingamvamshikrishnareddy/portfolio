@@ -6,27 +6,47 @@ const Contact = () => {
     email: '',
     message: ''
   });
+  const [responseMessage, setResponseMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
       [name]: value
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add form submission logic here
-    console.log('Form submitted:', formData);
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResponseMessage(data.message);
+        setFormData({ name: '', email: '', message: '' }); // Reset form
+      } else {
+        const { message } = await response.json();
+        setResponseMessage(`Error: ${message}`);
+      }
+    } catch (error) {
+      setResponseMessage('An error occurred while submitting the form.');
+      console.error('Error:', error); // Log the error for debugging
+    }
   };
 
   return (
     <section id="contact" className="py-16">
       <div className="container mx-auto max-w-md">
         <h2 className="text-4xl font-bold text-center mb-12 text-white">Contact Me</h2>
-        <form 
-          onSubmit={handleSubmit} 
+        <form
+          onSubmit={handleSubmit}
           className="bg-white/10 backdrop-blur-md rounded-xl p-8 shadow-lg"
         >
           <div className="mb-4">
@@ -65,13 +85,16 @@ const Contact = () => {
               required
             ></textarea>
           </div>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors"
           >
             Send Message
           </button>
         </form>
+        {responseMessage && (
+          <p className="mt-6 text-center text-white">{responseMessage}</p>
+        )}
       </div>
     </section>
   );

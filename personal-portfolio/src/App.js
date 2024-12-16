@@ -8,6 +8,7 @@ import Footer from './components/footer';
 import Experience from './components/Experience';
 import Education from './components/Education';
 import Contact from './components/Contact';
+import { gsap } from 'gsap';
 
 function App() {
   return (
