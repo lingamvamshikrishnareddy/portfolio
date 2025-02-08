@@ -62,7 +62,7 @@ const Footer = () => {
         <div className="text-center mb-8">
           <h3 className="text-2xl font-semibold mb-4">Hobbies & Interests</h3>
           <div className="flex justify-center space-x-4">
-            {['Programming', 'Machine Learning', 'Chess', 'Photography', 'Travel'].map((hobby) => (
+            {['Programming', 'Machine Learning', 'Chess', 'Drones', 'Homelab'].map((hobby) => (
               <span 
                 key={hobby} 
                 className="bg-white/10 px-4 py-2 rounded-full text-sm"
@@ -79,8 +79,7 @@ const Footer = () => {
           <div className="flex justify-center space-x-4">
             {[
               'AWS Cloud Practitioner',
-              'Google Data Analytics',
-              'Deep Learning Specialization'
+              
             ].map((cert) => (
               <span 
                 key={cert} 
@@ -97,7 +96,7 @@ const Footer = () => {
           <p className="text-sm flex items-center justify-center">
             Made with 
             <span className="text-red-500 mx-2 inline-block">❤️</span>
-            by Your Name
+            by lingamvamshikrishnareddy
           </p>
         </div>
       </div>

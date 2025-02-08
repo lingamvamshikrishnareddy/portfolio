@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -6,11 +7,14 @@ const Contact = () => {
     email: '',
     message: ''
   });
+
   const [responseMessage, setResponseMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [messageType, setMessageType] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevState) => ({
+    setFormData(prevState => ({
       ...prevState,
       [name]: value
     }));
@@ -18,26 +22,35 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setResponseMessage('');
+    setMessageType('');
+
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/contact`, {
-        method: 'POST',
+      // Updated endpoint to match the backend route
+      const response = await axios.post('/api/contact', formData, {
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setResponseMessage(data.message);
+      if (response.status === 200 || response.status === 201) {
+        setMessageType('success');
+        setResponseMessage(response.data.message || 'Message sent successfully! Thank you for contacting me.');
         setFormData({ name: '', email: '', message: '' }); // Reset form
       } else {
-        const { message } = await response.json();
-        setResponseMessage(`Error: ${message}`);
+        setMessageType('error');
+        setResponseMessage('Failed to send message. Please try again.');
       }
     } catch (error) {
-      setResponseMessage('An error occurred while submitting the form.');
-      console.error('Error:', error); // Log the error for debugging
+      setMessageType('error');
+      setResponseMessage(
+        error.response?.data?.message || 
+        'An error occurred while submitting the form. Please try again.'
+      );
+      console.error('Form submission error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -59,8 +72,10 @@ const Contact = () => {
               onChange={handleChange}
               className="w-full px-3 py-2 bg-black/10 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              disabled={isSubmitting}
             />
           </div>
+
           <div className="mb-4">
             <label htmlFor="email" className="block text-white mb-2">Email</label>
             <input
@@ -71,8 +86,10 @@ const Contact = () => {
               onChange={handleChange}
               className="w-full px-3 py-2 bg-black/10 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              disabled={isSubmitting}
             />
           </div>
+
           <div className="mb-6">
             <label htmlFor="message" className="block text-white mb-2">Message</label>
             <textarea
@@ -83,17 +100,33 @@ const Contact = () => {
               className="w-full px-3 py-2 bg-black/10 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows="4"
               required
+              disabled={isSubmitting}
             ></textarea>
           </div>
+
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition-colors"
+            className={`w-full py-3 rounded-md transition-colors ${
+              isSubmitting 
+                ? 'bg-blue-400 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            } text-white`}
+            disabled={isSubmitting}
           >
-            Send Message
+            {isSubmitting ? 'Sending...' : 'Send Message'}
           </button>
         </form>
+
         {responseMessage && (
-          <p className="mt-6 text-center text-white">{responseMessage}</p>
+          <div 
+            className={`mt-6 p-4 rounded-md text-center ${
+              messageType === 'success' 
+                ? 'bg-green-500/20 text-green-100' 
+                : 'bg-red-500/20 text-red-100'
+            }`}
+          >
+            {responseMessage}
+          </div>
         )}
       </div>
     </section>

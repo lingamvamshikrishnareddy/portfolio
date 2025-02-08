@@ -3,61 +3,73 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 
-// Now we can use mongoose
-mongoose.set('strictQuery', true);
-
 const app = express();
+const PORT = process.env.PORT || 5000;
+const MONGODB_URI = process.env.MONGODB_URI;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// CORS configuration
+
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'https://personal-portfolio-frontend-olzz.onrender.com',
+  origin: ['http://localhost:3000', 'http://localhost:5000','https://personal-portfolio-frontend-olzz.onrender.com'],
+  credentials: true,
   optionsSuccessStatus: 200
 };
 
-// Middleware
+app.use(cors(corsOptions));
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// MongoDB connection
+// MongoDB Connection
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI, {
+    await mongoose.connect(MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log('MongoDB connected successfully');
+    console.log('✅ MongoDB connected successfully');
   } catch (error) {
-    console.error('MongoDB connection error:', error);
-    console.log('MongoDB URI:', process.env.MONGODB_URI); // Log the URI for debugging
-    // Don't exit the process, allow the server to start without DB connection
+    console.error('❌ MongoDB connection error:', error.message);
+    if (NODE_ENV !== 'production') {
+      console.log('🔍 Debug MongoDB URI:', MONGODB_URI);
+    }
   }
 };
 
 connectDB();
 
-// Import routes
-let apiRoutes;
+// Import Routes Safely
 try {
-  apiRoutes = require('./routes/api');
+  const apiRoutes = require('./routes/api');
   app.use('/api', apiRoutes);
 } catch (error) {
-  console.error('Error importing API routes:', error);
+  console.error('❌ Error loading API routes:', error);
 }
 
-// Error handling middleware
+// Error Handling Middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+  console.error('❗ Server Error:', err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log('Environment:', process.env.NODE_ENV);
+// Start Server
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${NODE_ENV}`);
 });
 
-// Handle unhandled promise rejections
+// Graceful Shutdown (Handles crashes properly)
+process.on('SIGINT', async () => {
+  console.log('🔻 Shutting down server...');
+  await mongoose.connection.close();
+  console.log('📴 MongoDB connection closed');
+  server.close(() => {
+    console.log('✅ Server shut down cleanly');
+    process.exit(0);
+  });
+});
+
 process.on('unhandledRejection', (error) => {
-  console.error('Unhandled Rejection:', error);
+  console.error('🚨 Unhandled Promise Rejection:', error);
 });
