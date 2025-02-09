@@ -7,13 +7,19 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Logging middleware
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log('Request Body:', req.body);
+  next();
+});
+
 // Updated CORS options with your specific frontend URL
 const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:5000',
-    'https://portfolio-bunw.onrender.com',
-    'https://portfolio-bunw.onrender.com/'
+    'https://portfolio-bunw.onrender.com'
   ],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -21,7 +27,7 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-// Apply CORS middleware (removed duplicate)
+// Apply CORS middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 
