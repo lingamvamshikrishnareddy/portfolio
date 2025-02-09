@@ -12,7 +12,8 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageType, setMessageType] = useState('');
 
-   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+   const BACKEND_URL = 'https://portfolio-backend-gvzx.onrender.com';
+
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,34 +28,44 @@ const Contact = () => {
     setIsSubmitting(true);
     setResponseMessage('');
     setMessageType('');
+    
+  try {
+      console.log('Sending data to:', `${BACKEND_URL}/api/contact`);
+      console.log('Form data:', formData);
 
-    try {
-      // Updated endpoint to match the backend route
-      const response = await axios.post('/api/contact', formData, {
+      const response = await axios.post(`${BACKEND_URL}/api/contact`, formData, {
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        withCredentials: true
       });
-       console.log('Response:', response);
-      if (response.status === 200 || response.status === 201) {
+
+      console.log('Full response:', response);
+
+      if (response.data) {
         setMessageType('success');
         setResponseMessage(response.data.message || 'Message sent successfully! Thank you for contacting me.');
         setFormData({ name: '', email: '', message: '' }); // Reset form
       } else {
-        setMessageType('error');
-        setResponseMessage('Failed to send message. Please try again.');
+        throw new Error('No response data received');
       }
     } catch (error) {
+      console.error('Detailed error:', {
+        message: error.message,
+        response: error.response,
+        request: error.request
+      });
+      
       setMessageType('error');
       setResponseMessage(
         error.response?.data?.message || 
         'An error occurred while submitting the form. Please try again.'
       );
-      console.error('Form submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+    
 
   return (
     <section id="contact" className="py-16">
