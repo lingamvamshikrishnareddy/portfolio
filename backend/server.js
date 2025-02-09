@@ -2,24 +2,37 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-
-
+// Updated CORS options with your specific frontend URL
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:5000','https://personal-portfolio-frontend-olzz.onrender.com'],
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'https://portfolio-bunw.onrender.com',
+    'https://portfolio-bunw.onrender.com/'
+  ],
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-app.use(cors(corsOptions));
-
+// Apply CORS middleware (removed duplicate)
 app.use(cors(corsOptions));
 app.use(express.json());
+
+// Add a root route handler
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Server is live! 🚀',
+    environment: NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
+});
 
 // MongoDB Connection
 const connectDB = async () => {
@@ -47,6 +60,14 @@ try {
   console.error('❌ Error loading API routes:', error);
 }
 
+// Add a catch-all route handler
+app.use('*', (req, res) => {
+  res.status(404).json({
+    message: 'Route not found',
+    requestedUrl: req.originalUrl
+  });
+});
+
 // Error Handling Middleware
 app.use((err, req, res, next) => {
   console.error('❗ Server Error:', err.stack);
@@ -57,6 +78,7 @@ app.use((err, req, res, next) => {
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${NODE_ENV}`);
+  console.log(`🌐 CORS enabled for: ${corsOptions.origin.join(', ')}`);
 });
 
 // Graceful Shutdown (Handles crashes properly)
