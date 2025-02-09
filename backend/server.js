@@ -7,31 +7,33 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Logging middleware
+// Enhanced logging middleware
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-  console.log('Request Body:', req.body);
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
   next();
 });
 
-// Updated CORS options with your specific frontend URL
+// Updated CORS configuration
 const corsOptions = {
   origin: [
     'http://localhost:3000',
-    'http://localhost:5000',
-    'https://portfolio-bunw.onrender.com'
+    'https://portfolio-bunw.onrender.com',
+    'https://portfolio-bunw.onrender.com/'
   ],
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
 };
 
-// Apply CORS middleware
+// Apply middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Add a root route handler
+// Root route handler
 app.get('/', (req, res) => {
   res.json({
     message: 'Server is live! 🚀',
@@ -66,7 +68,7 @@ try {
   console.error('❌ Error loading API routes:', error);
 }
 
-// Add a catch-all route handler
+// Catch-all route handler
 app.use('*', (req, res) => {
   res.status(404).json({
     message: 'Route not found',
@@ -87,7 +89,7 @@ const server = app.listen(PORT, () => {
   console.log(`🌐 CORS enabled for: ${corsOptions.origin.join(', ')}`);
 });
 
-// Graceful Shutdown (Handles crashes properly)
+// Graceful Shutdown Handlers
 process.on('SIGINT', async () => {
   console.log('🔻 Shutting down server...');
   await mongoose.connection.close();
