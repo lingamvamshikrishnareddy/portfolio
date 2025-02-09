@@ -12,6 +12,8 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [messageType, setMessageType] = useState('');
 
+   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prevState => ({
@@ -33,7 +35,7 @@ const Contact = () => {
           'Content-Type': 'application/json',
         }
       });
-
+       console.log('Response:', response);
       if (response.status === 200 || response.status === 201) {
         setMessageType('success');
         setResponseMessage(response.data.message || 'Message sent successfully! Thank you for contacting me.');
